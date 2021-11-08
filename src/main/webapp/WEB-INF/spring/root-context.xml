@@ -24,7 +24,8 @@
 		<property name="mapperLocations">
 			<list>
 				<value>classpath:META-INF/mybatis/freeboard.xml</value>			
-				<value>classpath:META-INF/mybatis/comment.xml</value>			
+				<value>classpath:META-INF/mybatis/comment.xml</value>
+				<value>classpath:META-INF/mybatis/customer.xml</value>
 			</list>
 		</property>
 	</bean>

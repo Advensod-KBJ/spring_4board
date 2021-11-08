@@ -27,7 +27,7 @@ import com.jcpdev.board.service.CommentService;
 import com.jcpdev.board.service.FreeboardService;
 
 @Controller
-@RequestMapping("/community")	// -> view 폴더명 동일할때 생략, 리다이렉트 community 생략
+@RequestMapping("/community")    //-> view 폴더명 동일할때 생략, 리다이렉트 community 생략
 public class FreeboardController {
 	private static final Logger logger = LoggerFactory.getLogger(FreeboardController.class);
 	
@@ -36,6 +36,8 @@ public class FreeboardController {
 	
 	@Autowired
 	CommentService  cmtservice;
+	
+	
 //   http://localhost:8087/board/community 또는
 //   http://localhost:8087/board/community/list 와 매핑이 됩니다.	
 //   request mapping을 여러 url 요청으로 할수 있습니다.value 가 배열.
@@ -86,17 +88,16 @@ public class FreeboardController {
 	
 	//상세보기 : 미구현
 	@RequestMapping("/detail")     
-	public void detail(int idx,int page,String field,String findText,Model model) {
+	public void detail(int idx, int page,String field, String findText, Model model) {
 		
-		model.addAttribute("bean", service.getBoardOne(idx));
-		model.addAttribute("page", page);
-		model.addAttribute("cmtlist",cmtservice.commentList(idx));
-		model.addAttribute("cr","\n");
+		model.addAttribute("bean",service.getBoardOne(idx) );
+		model.addAttribute("cmtlist",cmtservice.commentList(idx) );
+		model.addAttribute("cr","\n" );
+		model.addAttribute("page",page);
 		model.addAttribute("field",field);
 		model.addAttribute("findText",findText);
 		
-		// view는 community/detail
-		// return "community/detail";
+		//view는 community/detail
 	}
 	
 	//글쓰기 - view  : insert() 메소드 
@@ -105,43 +106,52 @@ public class FreeboardController {
 		model.addAttribute("page", page);
 	}  //view이름은 insert
 	
+	
+	
 	//글쓰기 - 저장   : save()메소드  리다이렉트 list로.
 	@RequestMapping(value="/save")
-	public String save(@ModelAttribute Board board) {
-		//@ModelAttribute 생략가능 : form 입력 -> @ModelAttribute -> 컨트롤러 -> @ModelAttribute -> view
-		
+	public String save(@ModelAttribute Board board) {   
+//@ModelAttribute 생략 가능 : form 요소 입력 -> @ModelAttribute -> 컨트롤러  -> @ModelAttribute -> view
 		service.insert(board);
 		
 		return "redirect:list";
-		// redirect 할 때 / 가없으면 현재 경로에서 접근
-		// / 가 있으면 contextPath / board 에서 시작
-		// "redirect:community/list"는 오류
-		// "redirect:/community/list" 는 정상
+		//  redirect 할 때 , /가 없으면 현재 경로에서 접근
+		//  /가 있으면 contextPath  /board 에서 시작
+		//  "redirect:community/list" 는 오류 
+		//   "redirect:/community/list" 는 정상
 	}
 	
 	//수정 화면 출력
 	@RequestMapping(value = "update", method = RequestMethod.GET)
 	public void update(@RequestParam Map<String, String> param,Model model) {		//@RequestParam Map<String, String> param
 		model.addAttribute("bean", service.getBoardOne(Integer.parseInt(param.get("idx"))));
-		model.addAttribute("page", param.get("page"));
+		model.addAllAttributes(param);
+		logger.info(param.toString());
+		//model.addAttribute("page", param.get("page"));
 	}
 	
-	//수정내용 저장
+	
+	//수정 내용 저장
 	@RequestMapping(value = "update", method = RequestMethod.POST)
-	public String save2(Board board, int page,Model model) {
+	public String save2(Board board, int idx, int page,String field,String findText,Model model) {
+//@ModelAttribute Board board 입니다. update.jsp 의 form 요소 값 -> 컨트롤러		
 		service.update(board);
-		//@ModelAttribute Board board 임 update.jsp 의 form 요소 값 -> 컨트롤러
 		
-		model.addAttribute("page",page);
-		return "redirect:list";
-		
+		//model.addAttribute("page", page);			//1)
+		//return "redirect:list";
+		model.addAttribute("idx", board.getIdx());
+		model.addAttribute("page", page);
+		model.addAttribute("field",field);
+		model.addAttribute("findText", findText);
+		return "redirect:detail";   //수정
 	}
 	
-	//삭제 : 미구현
-	@RequestMapping(value = "delete")
-	public String delete (int idx,int page,Model model) {
-		service.delete(idx);
-		model.addAttribute("page",page);
+	//삭제 
+	@RequestMapping(value="delete")
+	public String delete(@RequestParam Map<String,Object> param,Model model) {
+		service.delete(Integer.parseInt((String)param.get("idx")));
+		//model.addAttribute("page", page);
+		model.addAllAttributes(param);
 		return "redirect:list";
 	}
 	

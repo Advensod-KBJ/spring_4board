@@ -13,12 +13,14 @@
 <P>  The time on the server is ${serverTime}. </P>
 <hr/>
 <a href="community/list">커뮤니티</a><br>
+<a href="gallery/gallery">갤러리</a>
 <a href="community/list2">커뮤니티(2)-컨트롤러 수정 테스트</a><br>
 <c:if test="${sessionScope.customer !=null }">  <!-- customer는 세션애트리뷰트입니다. -->
 	${sessionScope.customer.name }님(${sessionScope.customer.email }) 환영합니다.<br>
 	<a href="customer/detail">나의 정보</a><br>
 	<a href="logout">로그아웃</a><br>
 </c:if>
+
 <c:if test="${customer ==null }">
 	<a href="login">로그인</a><br>
 	<a href="customer/join?start=1">회원가입</a><br>

@@ -86,9 +86,27 @@ public class FreeboardController {
 		return "community/list";
 	}
 	
-	//상세보기 : 미구현
+	//상세보기 : 
 	@RequestMapping("/detail")     
-	public void detail(int idx, int page,String field, String findText, Model model) {
+//	public void detail(int idx, int page,String field, String findText, Model model) {     //쿠키로 조회수 카운트 구현하기 이전
+	public String detail(int idx, int page,String field, String findText, Model model
+			,HttpServletResponse response
+			,@CookieValue(name="read",defaultValue = "abcde") String readidx) {  //  read 쿠기값 예시 abcde/3/67/178/
+		//읽어올 쿠키이름은 read 쿠키 값이 없다면 기본값 "abcde" , 쿠키값을 저장할 변수는 readidx , default 값이 없으면 처음실행시 쿠키값없어서 오류
+		if(!readidx.contains(String.valueOf(idx))) {   //idx 정수값을 String으로 변환
+			//읽지 않은 글
+			readidx += "/" + idx;    //idx 가 캐스팅 되는것은 아닙니다.
+			//조회수 증가 메소드
+			service.updateReadCnt(idx);
+		}
+		
+		//쿠키값 없었을 때 또는 새로 변경되었을 때
+		Cookie cookie = new Cookie("read", readidx);
+		//쿠키 유효시간 설정, 
+		cookie.setMaxAge(30*60);    //초 단위, 30분
+		cookie.setPath("/board");   //쿠키 경로 설정
+		response.addCookie(cookie);		//기존 쿠키 정보에 쿠기 항목 추가  //쿠키는 자바스크립트에서 접근 가능합니다. document.cookie -> 보안상 취약
+					//쿠키가 HttpOnly 속성을 true -> 클라이언트 단에서는 쓰기 안됩니다. secure 속성은 암호화해서 전송 https 프로트콜 통신으로만 사용
 		
 		model.addAttribute("bean",service.getBoardOne(idx) );
 		model.addAttribute("cmtlist",cmtservice.commentList(idx) );
@@ -98,11 +116,13 @@ public class FreeboardController {
 		model.addAttribute("findText",findText);
 		
 		//view는 community/detail
+		return "community/detail";
 	}
 	
 	//글쓰기 - view  : insert() 메소드 
 	@RequestMapping(value="/insert")
 	public void insert(int page,Model model) {
+		//로그인 되었을때만 글쓰기
 		model.addAttribute("page", page);
 	}  //view이름은 insert
 	
@@ -124,9 +144,10 @@ public class FreeboardController {
 	//수정 화면 출력
 	@RequestMapping(value = "update", method = RequestMethod.GET)
 	public void update(@RequestParam Map<String, String> param,Model model) {		//@RequestParam Map<String, String> param
+		//로그인 되었을때만
 		model.addAttribute("bean", service.getBoardOne(Integer.parseInt(param.get("idx"))));
 		model.addAllAttributes(param);
-		logger.info(param.toString());
+		logger.info(param.toString());			//파라미터 이름 확인하세요.-idx,page,field,findText
 		//model.addAttribute("page", param.get("page"));
 	}
 	
